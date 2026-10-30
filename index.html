@@ -2062,123 +2062,16 @@
         /* عدّاد الانتقال تحت المكدّس */
         html body #linkTimer { align-self: center; width: min(232px, 100%); }
     </style>
-<style id="profile-dock-style">
-        /* =====================================================================
-           هيدر الصورة والاسم عند النزول (Profile Dock)
-           - عند النزول: الصورة الكبيرة والاسم يختفوا بتدريج ضبابي، وتظهر صورة صغيرة
-             يسار الشاشة والاسم بجانبها يمين، وأيقونة الإعدادات تختفي بنفس الحركة.
-           - عند الرجوع للأعلى: كل شيء يرجع كما كان.
-           ===================================================================== */
-
-        /* خلفية زجاجية خفيفة تحت الهيدر عشان البطاقات ما تتداخل مع الاسم أثناء النزول */
-        .dock-bar {
-            position: fixed; top: 0; left: 0; right: 0; height: 104px;
-            z-index: 899; pointer-events: none; opacity: 0;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.36) 55%, rgba(0, 0, 0, 0) 100%);
-            -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-            -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
-            mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
-            transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        body.light-mode .dock-bar {
-            background: linear-gradient(to bottom, rgba(253, 248, 240, 0.94) 0%, rgba(253, 248, 240, 0.66) 55%, rgba(253, 248, 240, 0) 100%);
-        }
-        .dock-bar.on { opacity: 1; }
-
-        .dock-header {
-            position: fixed; top: 20px; left: 20px; z-index: 900;
-            display: flex; align-items: center; gap: 10px;
-            direction: ltr; max-width: calc(100vw - 40px);
-            pointer-events: none;
-            visibility: hidden;
-            transition: visibility 0s linear 0.8s;
-        }
-        .dock-header.on { visibility: visible; transition-delay: 0s; }
-        .dock-header.no-trans .dock-pic,
-        .dock-header.no-trans .dock-name { transition: none !important; }
-
-        /* الحالة الأساسية = مخفي (ومنها بتبدأ/تنتهي الحركة). المتغيرات --px/--py/--ps بتتحدد من الجافاسكريبت
-           عشان العنصر يطلع من مكان الصورة الكبيرة نفسه ويرجع له */
-        .dock-pic {
-            flex: 0 0 42px; width: 42px; height: 42px; border-radius: 50%;
-            background-size: cover; background-position: center;
-            border: 2px solid var(--border-color);
-            box-shadow: 0 6px 18px var(--shadow-color);
-            cursor: zoom-in; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-            opacity: 0; filter: blur(9px);
-            transform: translate3d(var(--px, 0px), var(--py, -8px), 0) scale(var(--ps, 0.6));
-            transform-origin: 50% 50%;
-            will-change: transform, opacity, filter;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 0.32s ease-in 0.12s,
-                        filter 0.5s ease-in;
-        }
-        .dock-name {
-            display: flex; align-items: center; gap: 5px; min-width: 0; white-space: nowrap;
-            opacity: 0; filter: blur(9px);
-            transform: translate3d(var(--nx, -8px), var(--ny, 0px), 0) scale(var(--ns, 0.7));
-            transform-origin: 50% 50%;
-            will-change: transform, opacity, filter;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 0.3s ease-in 0.08s,
-                        filter 0.5s ease-in;
-        }
-        .dock-name .header-name { font-size: 1.3rem; line-height: 1.25; }
-        .dock-name .verify-badge { width: 0.95rem; height: 0.95rem; flex: 0 0 0.95rem; }
-
-        .dock-header.on .dock-pic {
-            pointer-events: auto;
-            opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0) scale(1);
-            transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
-                        opacity 0.3s ease-out,
-                        filter 0.6s ease-out;
-        }
-        .dock-header.on .dock-name {
-            opacity: 1; filter: blur(0px); transform: translate3d(0, 0, 0) scale(1);
-            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.06s,
-                        opacity 0.34s ease-out 0.08s,
-                        filter 0.6s ease-out 0.08s;
-        }
-
-        /* العناصر الكبيرة: تتلاشى بتدريج ضبابي عند النزول وتظهر تاني عند الرجوع.
-           التلاشي بيتم عن طريق filter (blur + opacity) لأن حركات الظهور الأصلية بتثبّت خاصية opacity
-           وبتمنع أي transition عليها، لكن filter حرّ. */
-        .profile-pic { transition: filter 0.55s ease 0.1s; }
-        .header-name-wrapper { transition: filter 0.55s ease 0.14s; }
-
-        body.is-docked .profile-pic {
-            filter: blur(10px) opacity(0) !important; pointer-events: none !important;
-            transition: filter 0.42s ease 0.02s;
-        }
-        body.is-docked .header-name-wrapper {
-            filter: blur(8px) opacity(0) !important; pointer-events: none !important;
-            transition: filter 0.4s ease;
-        }
-        /* في وضع عكس اللون الصورة ليها فلتر عكسي — نحافظ عليه ونضيف التمويه فوقه */
-        html.invert-mode .dock-pic { filter: invert(1) hue-rotate(180deg) blur(9px); }
-        html.invert-mode .dock-header.on .dock-pic { filter: invert(1) hue-rotate(180deg) blur(0px); }
-        html.invert-mode body.is-docked .profile-pic { filter: invert(1) hue-rotate(180deg) blur(10px) opacity(0) !important; }
-
-        /* أيقونة الإعدادات: تختفي بنفس الحركة (إلا لو اللوحة مفتوحة عشان تقدر تقفلها).
-           نستخدم خاصية scale المستقلة لأن transform بتاعها محجوز لحركة الظهور الأصلية. */
-        .settings-icon {
-            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, background-color 0.4s ease,
-                        filter 0.55s ease 0.1s, scale 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
-        }
-        body.is-docked .settings-icon:not(.rotate) {
-            filter: blur(8px) opacity(0) !important;
-            scale: 0.7;
-            pointer-events: none !important;
-            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, background-color 0.4s ease,
-                        filter 0.4s ease, scale 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .dock-pic, .dock-name { transform: none !important; filter: none !important; transition: opacity 0.2s linear !important; }
-            .dock-bar { transition: opacity 0.2s linear; }
-        }
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Ahmed Ghoneim"}</script><style>
+        /* زر إنشاء موقع الآن: نفس لمسة زر مشاركة الموقع الذهبية */
+        .inner-share-btn.create-site-btn { margin-top: 15px; }
+        .inner-share-btn i.fa-cube { font-size: 1.1rem; color: #FFD700; filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6)); transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+        .inner-share-btn:hover i.fa-cube { transform: rotate(15deg) scale(1.1); }
+        body.light-mode .inner-share-btn i.fa-cube { color: #B8860B; filter: none; }
+        body.high-contrast-text .inner-share-btn.create-site-btn { background: #000; border-color: #fff; }
+        body.light-mode.high-contrast-text .inner-share-btn.create-site-btn { background: #fff; border-color: #000; }
     </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Ahmed Ghoneim"}</script></head>
+</head>
 <body class="">
 
     <div class="welcome-screen">
@@ -2291,6 +2184,11 @@
                 <span class="bubble"><span class="ico-glow"><span class="ico-morph"><span class="gx g-l">ع</span><span class="gx g-r">EN</span></span></span></span>
             </div>
         </div>
+
+        <a class="inner-share-btn create-site-btn panel-item" id="createSiteBtn" href="builder.html" style="--delay: 0.22s; text-decoration: none;">
+            <span id="create-site-label" style="font-size: 0.75rem; font-weight: 700;">إنشاء موقع الآن</span>
+            <i class="fas fa-cube"></i>
+        </a>
 
         <div class="panel-item liq" style="--delay: 0.26s; margin-top: 15px; cursor: pointer; font-size: 0.75rem; background: var(--btn-bg); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 5px; justify-content: center;">
             <span id="web-contrib">+<span id="web-counter">0</span><span id="web-label">ويب</span></span>
@@ -2503,8 +2401,8 @@
         // باقي أكواد الموقع الأساسية
         // ==========================================
         const translations = {
-            ar: { welcome: "مرحباً", modeLight: "فاتح", modeDark: "مظلم", languageLabel: "اللغة", webContrib: "+", webLabel: "ويب", accTitle: "الوصول", fontSize: "حجم الخط", fontUp: "تكبير الخط", fontDown: "تصغير الخط", defaultFont: "الافتراضي", contrast: "تباين عالي", invertColors: "عكس الألوان", visitorTitle: "عدد زوار الموقع", copyright: "جميع الحقوق محفوظة 2026 لـ احمد غنيم", redirect: "سيتم انتقالك خلال", redirectingNow: "جاري الانتقال...", cancel: "إلغاء", shareSite: "مشاركة الموقع الخاص بي", copyLink: "نسخ الرابط", copied: "تم النسخ!", downloadQR: "تحميل", downloading: "جاري التحميل...", sharePanelText: "مشاركة الموقع", shareLinkTitle: "مشاركة الرابط", shareViaApps: "مشاركة عبر التطبيقات", notSupported: "متصفحك لا يدعم هذه الميزة", servicesLabel: "خدمات الموقع", tempMailLabel: "اصنع بريد مؤقت", moreLabel: "المزيد", soonTitle: "سيتم الإضافة قريباً", qrHint: "امسح الرمز لفتح الموقع", downloaded: "تم التحميل!", qrFailed: "تعذر إنشاء الباركود، حاول مرة أخرى" },
-            en: { welcome: "مرحباً", modeLight: "Light", modeDark: "Dark", languageLabel: "Language", webContrib: "+", webLabel: "web", accTitle: "Accessibility", fontSize: "Font Size", fontUp: "Increase font size", fontDown: "Decrease font size", defaultFont: "Default", contrast: "High Contrast", invertColors: "Invert Colors", visitorTitle: "Visitor Count", copyright: "جميع الحقوق محفوظة 2026 لـ احمد غنيم", redirect: "Redirecting in", redirectingNow: "Redirecting...", cancel: "Cancel", shareSite: "Share my website", copyLink: "Copy Link", copied: "Copied!", downloadQR: "Download", downloading: "Downloading...", sharePanelText: "Share Website", shareLinkTitle: "Share Link", shareViaApps: "Share via Apps", notSupported: "Browser not supported", servicesLabel: "Site Services", tempMailLabel: "Create Temp Email", moreLabel: "More", soonTitle: "Coming Soon", qrHint: "Scan to open the site", downloaded: "Saved!", qrFailed: "Could not create the QR code, please try again" }
+            ar: { createSite: "إنشاء موقع الآن", welcome: "مرحباً", modeLight: "فاتح", modeDark: "مظلم", languageLabel: "اللغة", webContrib: "+", webLabel: "ويب", accTitle: "الوصول", fontSize: "حجم الخط", fontUp: "تكبير الخط", fontDown: "تصغير الخط", defaultFont: "الافتراضي", contrast: "تباين عالي", invertColors: "عكس الألوان", visitorTitle: "عدد زوار الموقع", copyright: "جميع الحقوق محفوظة 2026 لـ احمد غنيم", redirect: "سيتم انتقالك خلال", redirectingNow: "جاري الانتقال...", cancel: "إلغاء", shareSite: "مشاركة الموقع الخاص بي", copyLink: "نسخ الرابط", copied: "تم النسخ!", downloadQR: "تحميل", downloading: "جاري التحميل...", sharePanelText: "مشاركة الموقع", shareLinkTitle: "مشاركة الرابط", shareViaApps: "مشاركة عبر التطبيقات", notSupported: "متصفحك لا يدعم هذه الميزة", servicesLabel: "خدمات الموقع", tempMailLabel: "اصنع بريد مؤقت", moreLabel: "المزيد", soonTitle: "سيتم الإضافة قريباً", qrHint: "امسح الرمز لفتح الموقع", downloaded: "تم التحميل!", qrFailed: "تعذر إنشاء الباركود، حاول مرة أخرى" },
+            en: { createSite: "Create your site now", welcome: "مرحباً", modeLight: "Light", modeDark: "Dark", languageLabel: "Language", webContrib: "+", webLabel: "web", accTitle: "Accessibility", fontSize: "Font Size", fontUp: "Increase font size", fontDown: "Decrease font size", defaultFont: "Default", contrast: "High Contrast", invertColors: "Invert Colors", visitorTitle: "Visitor Count", copyright: "جميع الحقوق محفوظة 2026 لـ احمد غنيم", redirect: "Redirecting in", redirectingNow: "Redirecting...", cancel: "Cancel", shareSite: "Share my website", copyLink: "Copy Link", copied: "Copied!", downloadQR: "Download", downloading: "Downloading...", sharePanelText: "Share Website", shareLinkTitle: "Share Link", shareViaApps: "Share via Apps", notSupported: "Browser not supported", servicesLabel: "Site Services", tempMailLabel: "Create Temp Email", moreLabel: "More", soonTitle: "Coming Soon", qrHint: "Scan to open the site", downloaded: "Saved!", qrFailed: "Could not create the QR code, please try again" }
         };
 
         let currentLang = 'ar';
@@ -2637,6 +2535,7 @@
             document.getElementById('dark-mode-label').innerText = t.modeLight;
             document.getElementById('light-mode-label').innerText = t.modeDark;
             document.getElementById('welcome-msg').innerText = translations.ar.welcome;
+            document.getElementById('create-site-label').innerText = t.createSite;
             const locale = currentLang === 'ar' ? 'ar-EG' : 'en-US';
             document.getElementById('web-contrib').innerHTML = `+<span id="web-counter">${(100).toLocaleString(locale)}</span><span id="web-label">${t.webLabel}</span>`;
             const visitCounter = document.getElementById('visit-counter');
@@ -3586,159 +3485,24 @@
         });
         profilePic.addEventListener('contextmenu', (event) => event.preventDefault());
 
-        // ==========================================
-        // هيدر الصورة والاسم عند النزول (Profile Dock)
-        // عند النزول: الصورة تصغر وتروح يسار، والاسم يروح يمينها، وأيقونة الإعدادات تختفي — كله بتدريج ضبابي.
-        // عند الرجوع للأعلى: كل شيء يرجع مكانه الطبيعي.
-        // ==========================================
-        (function profileDock() {
-            const bigPic = document.querySelector('.profile-pic');
-            const bigNameWrap = document.querySelector('.header-name-wrapper');
-            if (!bigPic || !bigNameWrap) return;
-            const bigName = bigNameWrap.querySelector('.header-name');
-            const bigBadge = bigNameWrap.querySelector('.verify-badge');
-            if (!bigName) return;
-
-            const DOCK_MAX = 48;       // أقصى مسافة نزول قبل ما يتحول للهيدر الصغير
-            const READY_AFTER = 4600;  // ننتظر انتهاء حركة الدخول الأولى
-            const body = document.body;
-
-            // ---- بناء الطبقة الصغيرة (نسخة من الصورة والاسم الأصليين) ----
-            const bar = document.createElement('div');
-            bar.className = 'dock-bar';
-            bar.setAttribute('aria-hidden', 'true');
-
-            const dock = document.createElement('div');
-            dock.className = 'dock-header';
-
-            const dPic = document.createElement('div');
-            dPic.className = 'dock-pic';
-            dPic.setAttribute('role', 'button');
-            dPic.setAttribute('tabindex', '0');
-
-            const dName = document.createElement('div');
-            dName.className = 'dock-name';
-            dName.setAttribute('aria-hidden', 'true');
-            dName.appendChild(bigName.cloneNode(true));
-            if (bigBadge) dName.appendChild(bigBadge.cloneNode(true));
-
-            dock.appendChild(dPic);
-            dock.appendChild(dName);
-            body.appendChild(bar);
-            body.appendChild(dock);
-
-            function syncPic() {
-                // نفس صورة الموقع بالظبط (من غير تكرار الرابط)
-                dPic.style.backgroundImage = getComputedStyle(bigPic).backgroundImage;
-                dPic.setAttribute('aria-label', bigPic.getAttribute('aria-label') || '');
-            }
-            syncPic();
-
-            // الضغط المطوّل على الصورة الصغيرة يفتح العارض زي الصورة الكبيرة
-            dPic.addEventListener('touchstart', startProfilePress, { passive: true });
-            dPic.addEventListener('touchend', endProfilePress, { passive: false });
-            dPic.addEventListener('touchcancel', cancelProfilePress, { passive: true });
-            dPic.addEventListener('mousedown', startProfilePress);
-            dPic.addEventListener('mouseup', endProfilePress);
-            dPic.addEventListener('mouseleave', cancelProfilePress);
-            dPic.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openProfileViewer(); }
-            });
-            dPic.addEventListener('contextmenu', (event) => event.preventDefault());
-
-            // ---- حساب نقطة البداية/النهاية للحركة (FLIP) ----
-            function finalBox(el) {
-                const d = dock.getBoundingClientRect();
-                return {
-                    cx: d.left + el.offsetLeft + el.offsetWidth / 2,
-                    cy: d.top + el.offsetTop + el.offsetHeight / 2,
-                    w: el.offsetWidth
-                };
-            }
-            function aim(el, vx, vy, vs, from) {
-                const to = finalBox(el);
-                const visible = from && from.width > 0 && from.bottom > 0 && from.top < window.innerHeight;
-                if (visible) {
-                    el.style.setProperty(vx, (from.left + from.width / 2 - to.cx).toFixed(2) + 'px');
-                    el.style.setProperty(vy, (from.top + from.height / 2 - to.cy).toFixed(2) + 'px');
-                    el.style.setProperty(vs, Math.max(0.2, Math.min(4, from.width / to.w)).toFixed(4));
-                } else {
-                    el.style.setProperty(vx, '0px');
-                    el.style.setProperty(vy, '-8px');
-                    el.style.setProperty(vs, '0.6');
-                }
-            }
-            function aimAll() {
-                aim(dPic, '--px', '--py', '--ps', bigPic.getBoundingClientRect());
-                aim(dName, '--nx', '--ny', '--ns', bigNameWrap.getBoundingClientRect());
-            }
-
-            // ---- الحالة ----
-            let docked = false;
-            let ready = false;
-            let lastUndock = 0;
-            let ticking = false;
-
-            function setDocked(next) {
-                if (next === docked) return;
-                docked = next;
-                const now = performance.now();
-                if (docked) {
-                    syncPic();
-                    // لو الصورة الصغيرة لسه راجعة (في نص الحركة) نكمل منها بدل ما نقفزها لنقطة البداية
-                    if (now - lastUndock > 850) {
-                        dock.classList.add('no-trans');
-                        aimAll();
-                        void dock.offsetWidth;
-                        dock.classList.remove('no-trans');
-                    }
-                    dock.classList.add('on');
-                    bar.classList.add('on');
-                    body.classList.add('is-docked');
-                } else {
-                    lastUndock = now;
-                    aimAll(); // الصورة الصغيرة ترجع لمكان الصورة الكبيرة وهي بتتلاشى
-                    dock.classList.remove('on');
-                    bar.classList.remove('on');
-                    body.classList.remove('is-docked');
-                }
-            }
-
-            function scrollY() {
-                return Math.max(window.pageYOffset || 0, document.documentElement.scrollTop || 0, document.body.scrollTop || 0);
-            }
-            // الصفحة قصيرة على بعض الشاشات (مسافة السكرول ممكن تكون كام بيكسل بس)،
-            // فالحدود بتتظبط تلقائيًا على حسب المسافة المتاحة فعلًا
-            function scrollRange() {
-                const de = document.documentElement;
-                return Math.max(de.scrollHeight - de.clientHeight, body.scrollHeight - body.clientHeight, 0);
-            }
-            function evaluate() {
-                ticking = false;
-                if (!ready) return;
-                const y = scrollY();
-                const dockAt = Math.min(DOCK_MAX, Math.max(6, scrollRange() * 0.45)); // نزول => هيدر صغير
-                const undockAt = Math.max(2, dockAt * 0.45);                          // رجوع => الوضع الطبيعي (فرق الرقمين يمنع الرجفة)
-                if (!docked && y > dockAt) setDocked(true);
-                else if (docked && y < undockAt) setDocked(false);
-            }
-            function onScroll() {
-                if (ticking) return;
-                ticking = true;
-                window.requestAnimationFrame(evaluate);
-            }
-            // capture: عشان نلتقط السكرول حتى لو حصل على body بدل window
-            window.addEventListener('scroll', onScroll, { passive: true, capture: true });
-            window.addEventListener('resize', onScroll, { passive: true });
-            window.setTimeout(() => { ready = true; evaluate(); }, READY_AFTER);
-        })();
-
         // Service Worker مع معالجة الخطأ (تجنب الفشل في حالة عدم وجود sw.js)
         if('serviceWorker' in navigator){
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').catch(() => { console.log('Service Worker not available'); });
             });
         }
+    </script>
+<script>
+        // يفتح الموقع الصانع بنفس لغة ووضع الصفحة الحالية
+        (function () {
+            const link = document.getElementById('createSiteBtn');
+            if (!link) return;
+            link.addEventListener('click', function () {
+                const lang = document.documentElement.lang === 'en' ? 'en' : 'ar';
+                const mode = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+                link.href = 'builder.html?lang=' + lang + '&mode=' + mode;
+            });
+        })();
     </script>
 </body>
 </html>
